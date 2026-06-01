@@ -12,7 +12,9 @@ export default function SignupCustomer() {
     email: "",
     phone: "",
     password: "",
-    confirmPassword: ""   // ✅ add confirmPassword
+    confirmPassword: "",
+    role: "customer",
+    adminCode: ""
   });
   const [msg, setMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +33,9 @@ export default function SignupCustomer() {
     else if (form.password.length < 6) newErrors.password = "Password must be at least 6 characters";
     if (!form.confirmPassword) newErrors.confirmPassword = "Please confirm your password";
     else if (form.confirmPassword !== form.password) newErrors.confirmPassword = "Passwords do not match";
+    if (form.role === "admin" && !form.adminCode.trim()) {
+      newErrors.adminCode = "Admin access code is required";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -43,21 +48,30 @@ export default function SignupCustomer() {
 
     setIsLoading(true);
     try {
-      // ✅ match backend field names and normalize
       const payload = {
         username: form.username.trim(),
         name: form.name.trim(),
         email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
         password: form.password,
-        confirmPassword: form.confirmPassword, // ✅ send confirmPassword
-        // role not sent → backend defaults to "customer"
+        confirmPassword: form.confirmPassword,
+        role: form.role,
       };
+      if (form.role === "admin") {
+        payload.adminCode = form.adminCode.trim();
+      }
 
-      // ❗️FIX: correct endpoint
       const { data } = await http.post("/auth/signup", payload);
 
       if (data.ok) {
+        if (data.user.role === "admin") {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          setMsg("Admin signup successful. Redirecting to admin dashboard...");
+          setTimeout(() => nav("/admin"), 1200);
+          return;
+        }
+
         setMsg(data.message || "Signup successful! Redirecting to login...");
         setTimeout(() => nav("/login"), 1500);
       } else {
@@ -178,6 +192,30 @@ export default function SignupCustomer() {
               />
               {errors.email && <div style={errorTextStyle}>{errors.email}</div>}
             </div>
+
+            <div style={inputGroupStyle}>
+              <select
+                style={{ ...inputStyle, appearance: "none", cursor: "pointer" }}
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              >
+                <option value="customer">Customer account</option>
+                <option value="admin">Admin account</option>
+              </select>
+            </div>
+
+            {form.role === "admin" && (
+              <div style={inputGroupStyle}>
+                <input
+                  style={{ ...inputStyle, ...(errors.adminCode ? inputErrorStyle : {}), ...(form.adminCode && !errors.adminCode ? inputFocusStyle : {}) }}
+                  type="password"
+                  placeholder="Admin access code"
+                  value={form.adminCode}
+                  onChange={(e) => setForm({ ...form, adminCode: e.target.value })}
+                />
+                {errors.adminCode && <div style={errorTextStyle}>{errors.adminCode}</div>}
+              </div>
+            )}
 
             <div style={inputGroupStyle}>
               <input

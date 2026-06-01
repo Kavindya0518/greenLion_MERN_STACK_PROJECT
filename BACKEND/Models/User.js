@@ -43,9 +43,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // ---- Explicit indexes (ensure uniqueness at DB) ----
-userSchema.index({ username: 1 }, { unique: true, sparse: true });
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ phone: 1 }, { unique: true, sparse: true });
+// Note: unique: true in field definitions already creates indexes, no need for duplicate schema.index() calls
 
 // ---- Hash password before save ----
 userSchema.pre("save", async function (next) {

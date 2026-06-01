@@ -8,13 +8,11 @@ const categoryStockSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      index: true,
     },
     categoryName: {
       type: String,
       required: true,
       trim: true,
-      index: true,
     },
     measurementType: {
       type: String,
@@ -41,7 +39,7 @@ categoryStockSchema.pre("save", function (next) {
 });
 
 // Indexes for performance
-categoryStockSchema.index({ categoryId: 1 }, { unique: true });
+// Note: unique: true on categoryId already creates an index
 categoryStockSchema.index({ categoryName: 1 });
 
 module.exports =

@@ -13,7 +13,7 @@ function signToken(payload) {
 
 exports.signup = async (req, res) => {
   try {
-    let { name, email, phone, username, password, confirmPassword } = req.body;
+    let { name, email, phone, username, password, confirmPassword, role = "customer", adminCode } = req.body;
 
     if (!name || !email || !password || !confirmPassword) {
       return res.status(400).json({ ok: false, message: "Missing required fields" });
@@ -29,6 +29,21 @@ exports.signup = async (req, res) => {
     email = String(email).trim().toLowerCase();
     username = username ? String(username).trim().toLowerCase() : undefined;
     phone = phone ? String(phone).trim() : undefined;
+    role = String(role || "customer").trim().toLowerCase();
+
+    if (!["customer", "admin"].includes(role)) {
+      return res.status(400).json({ ok: false, message: "Invalid signup role" });
+    }
+
+    if (role === "admin") {
+      const adminSignupCode = process.env.ADMIN_SIGNUP_CODE;
+      if (!adminSignupCode) {
+        return res.status(500).json({ ok: false, message: "Admin signup is not configured" });
+      }
+      if (!adminCode || String(adminCode).trim() !== adminSignupCode) {
+        return res.status(403).json({ ok: false, message: "Invalid admin signup code" });
+      }
+    }
 
     const exists = await User.findOne({
       $or: [
@@ -42,7 +57,7 @@ exports.signup = async (req, res) => {
     }
 
     // Model pre-save hook hashes password
-    const user = await User.create({ name, email, phone, username, password, role: "customer" });
+    const user = await User.create({ name, email, phone, username, password, role });
 
     const token = signToken({ id: user._id, role: user.role });
     res.status(201).json({
@@ -55,7 +70,7 @@ exports.signup = async (req, res) => {
         email: user.email,
         username: user.username,
         role: user.role,
-        supplierProfileId: null, // customers don't have one
+        supplierProfileId: null,
       },
     });
   } catch (e) {

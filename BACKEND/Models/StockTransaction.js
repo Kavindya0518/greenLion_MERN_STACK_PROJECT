@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const stockTransactionSchema = new mongoose.Schema(
   {
-    itemCode: { type: String, required: true, uppercase: true, trim: true, index: true },
+    itemCode: { type: String, required: true, uppercase: true, trim: true },
     itemType: { type: String, enum: ["raw_material", "finished_product"], required: true },
     transactionType: { type: String, enum: ["in", "out", "production", "adjustment"], required: true },
     quantity: { type: Number, required: true, min: 0 },

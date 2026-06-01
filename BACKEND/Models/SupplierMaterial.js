@@ -8,7 +8,7 @@ const supplierMaterialSchema = new mongoose.Schema(
 
     materialCode: { type: String, required: true, uppercase: true, trim: true, index: true },
     name: { type: String, required: true, trim: true },
-    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "MaterialCategory", index: true },
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "MaterialCategory" },
 
     unit: { type: String, required: true, enum: ["kg", "g", "L", "mL", "pcs", "units", "bag", "bale"] },
     price: { type: Number, required: true, min: 0 },

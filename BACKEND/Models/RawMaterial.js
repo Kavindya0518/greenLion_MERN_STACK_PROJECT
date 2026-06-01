@@ -11,13 +11,11 @@ const rawMaterialSchema = new mongoose.Schema(
       unique: true,
       uppercase: true,
       trim: true,
-      index: true,
     },
     name: {
       type: String,
       required: [true, "Name is required"],
       trim: true,
-      index: true,
     },
     description: { type: String, trim: true },
     unit: { type: String, enum: RAW_UNITS, required: true },
@@ -43,7 +41,7 @@ rawMaterialSchema.pre("save", function (next) {
 });
 
 // Helpful indexes
-rawMaterialSchema.index({ itemCode: 1 }, { unique: true });
+// Note: unique: true on itemCode already creates an index
 rawMaterialSchema.index({ name: 1 });
 rawMaterialSchema.index({ quantity: 1 });
 rawMaterialSchema.index({ reOrderLevel: 1 });

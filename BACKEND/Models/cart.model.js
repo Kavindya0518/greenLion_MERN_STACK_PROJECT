@@ -79,7 +79,6 @@ cartSchema.pre("save", function (next) {
 });
 
 // Indexes for faster queries
-cartSchema.index({ userId: 1 });
 cartSchema.index({ "items.productId": 1 });
 
 const Cart = mongoose.model("Cart", cartSchema);

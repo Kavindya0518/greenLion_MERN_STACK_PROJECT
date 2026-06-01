@@ -5,8 +5,7 @@ const productionUsageMapSchema = new mongoose.Schema(
     productId: { 
       type: mongoose.Schema.Types.ObjectId, 
       ref: "Product", 
-      required: true,
-      index: true 
+      required: true
     },
     productName: { 
       type: String, 
